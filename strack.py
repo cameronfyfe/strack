@@ -43,8 +43,8 @@ def strack_analyze(args):
     if config.enabled is False:
         return
 
-    # gcc object file to run anylsis on
-    obj_files = args[1:]
+    # gcc object files to run anylsis on
+    obj_files = args
 
     create_su_info_file_from_obj_files(su_info_filename, obj_files)
     create_cg_info_file_from_obj_files(cg_info_filename, obj_files)
