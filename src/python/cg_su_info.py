@@ -184,4 +184,3 @@ def analyze_cg_and_su(nodes_fname, report_fname, su_fname, cg_fname, config):
     f_report.write(json.dumps(report, indent=4))
     f_report.close()
 
-    print("Created " + nodes_fname + " and " + report_fname + " in " + str(time.time()-start_time) + " seconds.")

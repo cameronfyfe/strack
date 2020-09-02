@@ -2,9 +2,10 @@
     "enabled": true,
     "tracked_functions": [
         "main",
-        "DMA1_Stream2_IRQHandler"
+        "LED_Thread1",
+        "LED_Thread2"
     ],
     "frame_cost": 4,
-    "allow_recursion": true,
-    "allow_function_ptrs": true
+    "allow_recursion": false,
+    "allow_function_ptrs": false
 }

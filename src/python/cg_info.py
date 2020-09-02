@@ -66,5 +66,3 @@ def create_cg_info_file_from_obj_files(cg_filename, obj_files):
     f_edges_json = open(cg_filename, "w")
     f_edges_json.write(json.dumps(fn_edges_json, indent=4, cls=FnInfoEncoder))
     f_edges_json.close()
-
-    print("Created " + cg_filename + " in " + str(time.time()-start_time) + " seconds.")

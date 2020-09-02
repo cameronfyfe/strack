@@ -71,5 +71,3 @@ def create_su_info_file_from_obj_files(su_filename, obj_files):
     f_fn_nodes = open(su_filename, "w")
     f_fn_nodes.write(json.dumps(fn_su_json, indent=4, cls=FnInfoEncoder))
     f_fn_nodes.close()
-
-    print("Created " + su_filename + " in " + str(time.time()-start_time) + " seconds.")
