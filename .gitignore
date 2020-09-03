@@ -1,7 +1,7 @@
 # strack generate files
 strack_log.txt
 strack_su.json
-strack_gc.json
+strack_cg.json
 strack_fn_nodes.json
 strack_report.json
 
