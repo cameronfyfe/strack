@@ -3,8 +3,8 @@ import os
 import subprocess
 import time
 import json
-from .debug_log import *
-from .function_node import *
+from debug_log import *
+from function_node import *
 
 
 def get_node_edge_info_list_from_object_file(obj_filepath):
@@ -66,3 +66,8 @@ def create_cg_info_file_from_obj_files(cg_filename, obj_files):
     f_edges_json = open(cg_filename, "w")
     f_edges_json.write(json.dumps(fn_edges_json, indent=4, cls=FnInfoEncoder))
     f_edges_json.close()
+
+
+if __name__ == "__main__":
+    debug_log_init("local/strack_log.txt", append=True)
+    create_cg_info_file_from_obj_files(sys.argv[1], sys.argv[2:])

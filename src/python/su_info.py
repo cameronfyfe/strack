@@ -2,7 +2,8 @@ import sys
 import os
 import time
 import json
-from .function_node import *
+from debug_log import *
+from function_node import *
 
 
 def get_fn_info_list_from_su_file(obj_filepath):
@@ -71,3 +72,7 @@ def create_su_info_file_from_obj_files(su_filename, obj_files):
     f_fn_nodes = open(su_filename, "w")
     f_fn_nodes.write(json.dumps(fn_su_json, indent=4, cls=FnInfoEncoder))
     f_fn_nodes.close()
+
+if __name__ == "__main__":
+    debug_log_init("local/strack_log.txt", append=True)
+    create_su_info_file_from_obj_files(sys.argv[1], sys.argv[2:])

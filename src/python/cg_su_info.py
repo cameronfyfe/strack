@@ -3,9 +3,10 @@ import os
 import subprocess
 import time
 import json
-from src.python.utils import *
-from src.python.debug_log import *
-from src.python.function_node import *
+from utils import *
+from config import *
+from debug_log import *
+from function_node import *
 
 
 def callpath_has_recursion(callpath):
@@ -184,3 +185,13 @@ def analyze_cg_and_su(nodes_fname, report_fname, su_fname, cg_fname, config):
     f_report.write(json.dumps(report, indent=4))
     f_report.close()
 
+if __name__ == "__main__":
+    
+    debug_log_init("local/strack_log.txt", append=True)
+
+    # get config from config file
+    f_config_json = open(sys.argv[5], "r")
+    config = StrackConfig(f_config_json.read())
+    f_config_json.close()
+
+    analyze_cg_and_su(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], config)
