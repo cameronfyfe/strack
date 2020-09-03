@@ -1,3 +1,8 @@
+# C disassembly, object files, stack usage files
+*.cdasm
+*.o
+*.su
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
