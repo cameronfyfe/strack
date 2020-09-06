@@ -19,7 +19,7 @@ def debug_log_deinit():
 
 def debug_log(msg, print_to_console=False):
     global f_debug
-    msg_str = str(msg)
+    msg_str = str(msg) + "\r\n"
     f_debug.write(msg_str)
     if print_to_console is True:
         print(msg_str)

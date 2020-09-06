@@ -72,7 +72,7 @@ def strack_report():
     )
 
 if __name__ == "__main__":
-    
+
     strack_path = sys.argv[1]
     debug_log_init(strack_path + "/local/strack_log.txt")
     strack_function = sys.argv[2]
