@@ -1,0 +1,33 @@
+stages:
+  - build
+  - tests
+
+Build:
+  stage: build
+  image: "rust:1.48.0"
+  cache:
+    key: build_$CI_COMMIT_REF_SLUG
+    paths:
+      - target/
+  script:
+    - cargo build
+
+BuildTests:
+  stage: build
+  image: "rust:1.48.0"
+  cache:
+    key: build_$CI_COMMIT_REF_SLUG
+    paths:
+      - target/
+  script:
+    - cargo build --tests
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 hour
+
+RunTests:
+  stage: tests
+  image: "rust:1.48.0"
+  script:
+    - cargo test
