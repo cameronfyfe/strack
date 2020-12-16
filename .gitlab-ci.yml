@@ -9,6 +9,10 @@ variables:
 Docker:
   stage: docker
   image: docker:dind
+  cache:
+    key: docker_$CI_COMMIT_REF_SLUG
+    paths:
+    - /var/lib/docker/
   script:
     # start docker daemon and give it time before making request
     - dockerd &
