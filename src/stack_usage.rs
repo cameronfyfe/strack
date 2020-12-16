@@ -17,16 +17,18 @@ pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&P
     }
 
     // Write stack usage info to json format
-    let json = serde_json::to_string(&fns).unwrap();
+    let json = serde_json::to_string_pretty(&fns).unwrap();
 
     fs::create_dir_all(su_json_path.parent().unwrap()).unwrap();
-    fs::remove_file(su_json_path).unwrap();
+    // fs::remove_file(su_json_path).unwrap();
     let mut su_json_file = fs::File::create(su_json_path).unwrap();
     su_json_file.write(json.as_bytes()).unwrap();
 }
 
 fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage> {
     let mut fns = Vec::new();
+
+    println!("Parsing .su for {}", o_filepath.to_string_lossy());
 
     // Convert .o filename to .su
     let mut su_filepath = o_filepath.to_path_buf();
@@ -52,8 +54,10 @@ fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage>
         let line =
             line.expect(format!("Unreadable line encountered in {}", su_filepath_str).as_str());
         let lang = if line.contains('(') {
+            println!("Cpp Lang");
             Lang::Cpp
         } else {
+            println!("C Lang");
             Lang::C
         };
         match lang {
@@ -69,10 +73,15 @@ fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage>
                         let stack_usage = cols[1].parse::<u32>().unwrap();
                         let stack_usage_type = cols[2]; // TODO: seems like this is always "static", what are other types?
 
+                        println!("{} {} {}", fn_symbol, stack_usage, stack_usage_type);
+
+                        // UPDATE NAMES HERE SO JSON FILE IS MADE WITH CORRECT FIELDS
+
                         let fn_su = FnStackUsage {
                             node: FnInfo::new(o_filepath, fn_symbol),
                             local_type: stack_usage_type.to_string(),
                             local_usage: Some(stack_usage),
+                            su_local_known: true,
                         };
 
                         fns.push(fn_su);

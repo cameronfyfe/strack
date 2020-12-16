@@ -14,7 +14,7 @@ pub fn analyze(ctx: &Context, args: Vec<&str>) {
         &ctx.su_info_json_path(),
         args.iter().map(|&p| Path::new(p)).collect(),
     );
-    // let status = Command::new("python3") o_filepaths: &args)
+    // let status = Command::new("python3")
     //     .arg("src/python/su_info.py")
     //     .arg(ctx.su_info_json_path())
     //     .args(&args)

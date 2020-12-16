@@ -24,7 +24,7 @@ fn _main(args: Vec<String>) -> i32 {
     // Read config file, prepare running context
     let ctx = match Context::new(strack_path) {
         Ok(ctx) => ctx,
-        Err(msg) => panic!("Issue reading strack config."),
+        Err(_) => panic!("Issue reading strack config."),
     };
 
     // Check if strack is enabled

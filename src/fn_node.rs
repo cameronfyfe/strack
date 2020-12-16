@@ -20,7 +20,10 @@ fn name_from_symbol(symbol: &str) -> &str {
 pub struct FnInfo {
     pub name: String,
     pub symbol: String,
+    #[serde(rename = "obj_filepath")]
     pub o_pathbuf: PathBuf,
+    #[serde(rename = "obj_filename")]
+    pub o_filename: String,
     pub lang: Lang,
     pub arg_types: Vec<String>,
     pub return_type: String, // TODO: o_name, from PathBuf
@@ -32,6 +35,7 @@ impl FnInfo {
             name: name_from_symbol(symbol).to_string(),
             symbol: symbol.to_string(),
             o_pathbuf: o_filepath.to_path_buf(),
+            o_filename: o_filepath.file_name().unwrap().to_string_lossy().to_string(),
             lang: Lang::C, // TODO Cpp
             arg_types: Vec::new(),
             return_type: String::new(),
@@ -41,9 +45,13 @@ impl FnInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct FnStackUsage {
+    #[serde(rename = "fn_id")]
     pub node: FnInfo,
+    #[serde(rename = "su_local_type")]
     pub local_type: String, // What is this ('static')
+    #[serde(rename = "su_local")]
     pub local_usage: Option<u32>,
+    pub su_local_known: bool
 }
 
 #[derive(Serialize, Deserialize)]
@@ -54,10 +62,21 @@ pub struct FnEdgeInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct FnNode {
+    #[serde(rename = "fn_id")]
     pub info: FnInfo,
-    pub stack_usage: FnStackUsage,
-    pub edge_info: FnEdgeInfo,
+    pub stack_usage: Option<FnStackUsage>,
+    pub edge_info: Option<FnEdgeInfo>,
     pub children_missing: Vec<String>,
     pub su_max: u32,
+    pub su_max_known: bool, // TODO: remove
     pub su_max_call_path: Vec<String>,
+
+    #[serde(rename = "su_local_type")]
+    pub local_type: String, // What is this ('static')
+    #[serde(rename = "su_local")]
+    pub local_usage: Option<u32>,
+    pub su_local_known: bool,
+
+    pub children: Vec<FnEdgeInfo>,
+
 }
