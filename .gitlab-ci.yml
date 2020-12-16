@@ -11,10 +11,11 @@ Docker:
   image: docker:dind
   script:
     # start docker daemon and give it time before making request
-    - dockerd &
+    - dockerd >/dev/null 2>&1 &
     - sleep 5 
     # unset docker host so requests go to local service
     - unset DOCKER_HOST
+    # enable docker buildkit so caching options work
     - export DOCKER_BUILDKIT=1
     # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
