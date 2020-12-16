@@ -8,13 +8,14 @@ variables:
 
 Docker:
   stage: docker
-  # services:
-  #   - docker:dind
-  image: docker:dind
+  image: docker:latest
   script:
+    # start docker daemon and give it time before making request
     - dockerd &
-    - sleep 5
+    - sleep 5 
+    # unset docker host so requests go to local service
     - unset DOCKER_HOST
+    # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t $DOCKER_IMAGE .
     - docker push $DOCKER_IMAGE
