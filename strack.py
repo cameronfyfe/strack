@@ -78,12 +78,6 @@ if __name__ == "__main__":
     strack_function = sys.argv[2]
     args = sys.argv[3:]
     
-    # for debug
-    # strack_path = "."
-    # debug_log_init(strack_path + "/local/strack_log.txt")
-    # strack_function = "analyze"
-    # args = "example/Debug/Application/SW4STM32/startup_stm32h743xx.o example/Debug/Application/User/main.o example/Debug/Application/User/stm32h7xx_hal_timebase_tim.o example/Debug/Application/User/stm32h7xx_it.o example/Debug/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o example/Debug/Drivers/CMSIS/system_stm32h7xx.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_adc.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_adc_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_cortex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_dma.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_dma_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_exti.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_gpio.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_i2c.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_i2c_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_pwr.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_pwr_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_uart.o example/Debug/Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_uart_ex.o example/Debug/Middlewares/FreeRTOS/CMSIS-RTOS/cmsis_os.o example/Debug/Middlewares/FreeRTOS/croutine.o example/Debug/Middlewares/FreeRTOS/event_groups.o example/Debug/Middlewares/FreeRTOS/list.o example/Debug/Middlewares/FreeRTOS/queue.o example/Debug/Middlewares/FreeRTOS/tasks.o example/Debug/Middlewares/FreeRTOS/timers.o example/Debug/Middlewares/FreeRTOS/portable/heap_4.o example/Debug/Middlewares/FreeRTOS/portable/port.o".split()
-
     su_info_filename = strack_path + "/local/strack_su.json"
     cg_info_filename = strack_path + "/local/strack_cg.json"
     node_info_filename = strack_path + "/out/strack_fn_nodes.json"
