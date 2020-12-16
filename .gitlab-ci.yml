@@ -8,12 +8,15 @@ variables:
 
 Docker:
   stage: docker
-  services:
-    - docker:dind
+  # services:
+  #   - docker:dind
   image: docker:latest
   before_script:
+    - dockerd &
+    - sleep 5
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
+
     - docker build --pull -t $DOCKER_IMAGE .
     - docker push $DOCKER_IMAGE
 
