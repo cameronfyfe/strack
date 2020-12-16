@@ -14,6 +14,7 @@ Docker:
   script:
     - dockerd &
     - sleep 5
+    - unset DOCKER_HOST
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t $DOCKER_IMAGE .
     - docker push $DOCKER_IMAGE
