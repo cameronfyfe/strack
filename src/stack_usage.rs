@@ -9,7 +9,7 @@ use super::fn_node::FnInfo;
 use super::fn_node::FnStackUsage;
 use super::fn_node::Lang;
 
-fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&Path>) {
+pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&Path>) {
     // Get stack usage info from .su files
     let mut fns = Vec::new();
     for o_filepath in o_filepaths {
@@ -37,8 +37,15 @@ fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage>
     let su_filepath_str = su_filepath.to_string_lossy();
 
     // Open .su file
-    let su_file = fs::File::open(&su_filepath)
-        .expect(format!("Missing {} for {}.", su_filepath_str, o_filepath_str,).as_str());
+    let su_file = match fs::File::open(&su_filepath) {
+        Ok(su_file) => su_file,
+        Err(_) => {
+            // TODO: rules for which files can be missing .su files.
+            // probably only asm files
+            println!("Missing {} for {}.", su_filepath_str, o_filepath_str);
+            return Vec::new();
+        }
+    };
 
     // Read .su file
     for line in BufReader::new(su_file).lines() {
