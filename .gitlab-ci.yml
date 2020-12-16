@@ -19,7 +19,6 @@ Docker:
     - export DOCKER_BUILDKIT=1
     # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker pull $DOCKER_IMAGE
     - >
       docker build
       --cache-from $DOCKER_IMAGE
