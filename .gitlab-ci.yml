@@ -19,8 +19,9 @@ Docker:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - >
       docker build
-      --build-arg BUILDKIT_INLINE_CACHE=1
+      --pull
       --cache-from $DOCKER_IMAGE
+      --build-arg BUILDKIT_INLINE_CACHE=1
       --tag $DOCKER_IMAGE
       .
     - docker push $DOCKER_IMAGE
