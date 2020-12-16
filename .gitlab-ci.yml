@@ -9,10 +9,6 @@ variables:
 Docker:
   stage: docker
   image: docker:dind
-  cache:
-    key: docker_$CI_COMMIT_REF_SLUG
-    paths:
-    - /var/lib/docker/
   script:
     # start docker daemon and give it time before making request
     - dockerd &
@@ -21,7 +17,8 @@ Docker:
     - unset DOCKER_HOST
     # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build --pull -t $DOCKER_IMAGE .
+    - docker build --cache-from $DOCKER_IMAGE
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_IMAGE .
     - docker push $DOCKER_IMAGE
 
 Build:
