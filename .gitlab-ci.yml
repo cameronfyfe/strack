@@ -1,10 +1,29 @@
 stages:
+  - docker
   - build
   - tests
 
+variables:
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+Docker:
+  stage: docker
+  image: docker:18
+  before_script:
+    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+  script:
+    - docker pull $CIR_REGISTRY_IMAGE:latest || true
+    - >
+      docker build
+      --pull
+      --cache-from $CI_REGISTRY_IMAGE:latest
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
 Build:
   stage: build
-  image: "rust:1.48.0"
+  image: $DOCKER_IMAGE
   cache:
     key: build_$CI_COMMIT_REF_SLUG
     paths:
@@ -14,7 +33,7 @@ Build:
 
 BuildTests:
   stage: build
-  image: "rust:1.48.0"
+  image: $DOCKER_IMAGE
   cache:
     key: build_$CI_COMMIT_REF_SLUG
     paths:
@@ -28,7 +47,7 @@ BuildTests:
 
 RunTests:
   stage: tests
-  image: "rust:1.48.0"
+  image: $DOCKER_IMAGE
   script:
     - make clean-test
     - make test
