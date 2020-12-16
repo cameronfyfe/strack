@@ -6,11 +6,17 @@
       {
         "label": "build",
         "type": "shell",
-        "command": "cargo check && cargo check --tests && rustfmt src/*",
+        "command": "cargo check && cargo check --tests",
         "group": {
             "kind": "build",
             "isDefault": true
         }
+      },
+      {
+        "label": "fmt",
+        "type": "shell",
+        "command": "rustfmt ./*",
       }
     ]
   }
+  

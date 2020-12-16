@@ -1,27 +1,45 @@
+#[macro_use]
+extern crate prettytable;
+pub mod config;
 pub mod fn_node;
 pub mod report;
 pub mod stack_usage;
 
-use std;
 use std::env;
 use std::fs;
 use std::io::Read;
+use std::path::Path;
 use std::process::Command;
+use std::{self, process::exit};
 
+use config::{Config, Context};
 use serde_json;
 
-fn _main(args_vec: Vec<String>) -> i32 {
-    // Call strack.py with same command line args
-    let status = Command::new("python3")
-        .arg("strack.py")
-        .args(args_vec)
-        .status()
-        .expect("process failed to execute");
+fn _main(args: Vec<String>) -> i32 {
+    let strack_path = Path::new(&args[0]);
+    let strack_function = args[1].as_str();
+    let strack_args = args[2..].iter().map(AsRef::as_ref).collect::<Vec<&str>>();
 
-    match status.code() {
-        Some(code) => code,
-        None => 0,
+    // Read config file, prepare running context
+    let ctx = match Context::new(strack_path) {
+        Ok(ctx) => ctx,
+        Err(msg) => panic!("Issue reading strack config."),
+    };
+
+    match strack_function {
+        "analyze" => {
+            // TODO
+        }
+        "report" => {
+            report::report(&ctx);
+        }
+        _ => {
+            println!("Invalid strack function.");
+            return 1;
+        }
     }
+    // Ok
+    0
 }
 
 fn main() {
@@ -82,7 +100,7 @@ mod tests {
         assert_eq!(ret, 0);
 
         // Results file exists
-        let report_file = std::path::Path::new("out/strack_report.json");
+        let report_file = Path::new("out/strack_report.json");
         assert_eq!(report_file.exists(), true);
 
         // Read results file

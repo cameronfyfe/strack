@@ -59,5 +59,5 @@ pub struct FnNode {
     pub edge_info: FnEdgeInfo,
     pub children_missing: Vec<String>,
     pub su_max: u32,
-    pub su_max_callPathBuf: Vec<String>,
+    pub su_max_call_path: Vec<String>,
 }
