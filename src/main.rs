@@ -2,6 +2,7 @@
 extern crate prettytable;
 pub mod config;
 pub mod fn_node;
+pub mod analyze;
 pub mod report;
 pub mod stack_usage;
 
@@ -26,12 +27,18 @@ fn _main(args: Vec<String>) -> i32 {
         Err(msg) => panic!("Issue reading strack config."),
     };
 
+    // Check if strack is enabled
+    if ctx.config.enabled == false {
+        return 1;
+    }
+
+    // Run Strack Function
     match strack_function {
         "analyze" => {
-            // TODO
+            analyze::analyze(&ctx, strack_args);
         }
         "report" => {
-            report::report(&ctx);
+            report::report(&ctx, strack_args);
         }
         _ => {
             println!("Invalid strack function.");
