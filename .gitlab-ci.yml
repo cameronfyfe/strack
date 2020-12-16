@@ -17,8 +17,12 @@ Docker:
     - unset DOCKER_HOST
     # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build --cache-from $DOCKER_IMAGE
-    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $DOCKER_IMAGE .
+    - >
+      docker build
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      --cache-from $DOCKER_IMAGE
+      --tag $DOCKER_IMAGE
+      .
     - docker push $DOCKER_IMAGE
 
 Build:
