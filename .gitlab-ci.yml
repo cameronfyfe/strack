@@ -30,4 +30,6 @@ RunTests:
   stage: tests
   image: "rust:1.48.0"
   script:
+    # TODO: remove this once it's not needed
+    - python3 -m pip install terminaltables
     - cargo test
