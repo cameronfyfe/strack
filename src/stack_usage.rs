@@ -19,10 +19,12 @@ pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&P
     // Write stack usage info to json format
     let json = serde_json::to_string_pretty(&fns).unwrap();
 
+    // Write stack usage json to file
     fs::create_dir_all(su_json_path.parent().unwrap()).unwrap();
-    // fs::remove_file(su_json_path).unwrap();
-    let mut su_json_file = fs::File::create(su_json_path).unwrap();
-    su_json_file.write(json.as_bytes()).unwrap();
+    fs::File::create(su_json_path)
+        .unwrap()
+        .write(json.as_bytes())
+        .unwrap();
 }
 
 fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage> {
