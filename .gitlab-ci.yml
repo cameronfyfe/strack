@@ -8,7 +8,7 @@ variables:
 
 Docker:
   stage: docker
-  image: docker:latest
+  image: docker:dind
   script:
     # start docker daemon and give it time before making request
     - dockerd &
