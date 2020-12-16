@@ -10,7 +10,7 @@ Docker:
   stage: docker
   # services:
   #   - docker:dind
-  image: docker:latest
+  image: docker:dind
   script:
     - dockerd &
     - sleep 5
