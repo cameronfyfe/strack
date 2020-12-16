@@ -15,11 +15,11 @@ Docker:
     - sleep 5 
     # unset docker host so requests go to local service
     - unset DOCKER_HOST
+    - export DOCKER_BUILDKIT=1
     # build and push image
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - >
       docker build
-      --pull
       --cache-from $DOCKER_IMAGE
       --build-arg BUILDKIT_INLINE_CACHE=1
       --tag $DOCKER_IMAGE
