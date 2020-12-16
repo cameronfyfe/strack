@@ -10,7 +10,7 @@ Build:
     paths:
       - target/
   script:
-    - cargo build
+    - make build
 
 BuildTests:
   stage: build
@@ -20,7 +20,7 @@ BuildTests:
     paths:
       - target/
   script:
-    - cargo build --tests
+    - make build-tests
   artifacts:
     paths:
       - target/
@@ -30,4 +30,5 @@ RunTests:
   stage: tests
   image: "rust:1.48.0"
   script:
-    - cargo test
+    - make clean-test
+    - make test
