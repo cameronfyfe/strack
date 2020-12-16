@@ -20,6 +20,7 @@ pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&P
     let json = serde_json::to_string_pretty(&fns).unwrap();
 
     // Write stack usage json to file
+    println!("Writing su json to {}.", su_json_path.to_string_lossy());
     fs::create_dir_all(su_json_path.parent().unwrap()).unwrap();
     fs::File::create(su_json_path)
         .unwrap()
