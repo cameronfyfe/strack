@@ -2,12 +2,35 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::vec::Vec;
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error};
+use std::clone::Clone;
+#[derive(Clone)]
 pub enum Lang {
     C,
     Cpp,
+}
+
+impl Serialize for Lang {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        serializer.serialize_str(match *self {
+            Lang::C => "C",
+            Lang::Cpp => "Cpp",
+        })
+    }
+}
+impl <'de> Deserialize<'de> for Lang {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
+            "C" => Ok(Lang::C),
+            "Cpp" => Ok(Lang::Cpp),
+            _ => Err(D::Error::custom(format!("Rejectedt '{}', 'C' or 'Cpp' are only valid lang values", &s)))
+        }
+    }
 }
 
 // TODO: do this better, put this somewhere that makes more sense
@@ -15,7 +38,7 @@ fn name_from_symbol(symbol: &str) -> &str {
     // TODO: demangle if Cpp
     symbol
 }
-
+#[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct FnInfo {
     pub name: String,
@@ -35,7 +58,11 @@ impl FnInfo {
             name: name_from_symbol(symbol).to_string(),
             symbol: symbol.to_string(),
             o_pathbuf: o_filepath.to_path_buf(),
-            o_filename: o_filepath.file_name().unwrap().to_string_lossy().to_string(),
+            o_filename: o_filepath
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .to_string(),
             lang: Lang::C, // TODO Cpp
             arg_types: Vec::new(),
             return_type: String::new(),
@@ -51,13 +78,15 @@ pub struct FnStackUsage {
     pub local_type: String, // What is this ('static')
     #[serde(rename = "su_local")]
     pub local_usage: Option<u32>,
-    pub su_local_known: bool
+    pub su_local_known: bool,
 }
 
+#[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct FnEdgeInfo {
+    #[serde(rename = "fn_id")]
     pub node: FnInfo,
-    pub children: Vec<FnEdgeInfo>,
+    pub children: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -78,5 +107,4 @@ pub struct FnNode {
     pub su_local_known: bool,
 
     pub children: Vec<FnEdgeInfo>,
-
 }

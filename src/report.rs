@@ -33,7 +33,7 @@ impl Report {
     }
 }
 
-pub fn report(ctx: &Context, args: Vec<&str>) {
+pub fn report(ctx: &Context) {
     // Read report file
     let mut bfr = String::new();
     fs::File::open(ctx.report_json_path())

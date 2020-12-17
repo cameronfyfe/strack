@@ -9,7 +9,7 @@ use super::fn_node::FnInfo;
 use super::fn_node::FnStackUsage;
 use super::fn_node::Lang;
 
-pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: Vec<&Path>) {
+pub fn create_su_info_file_from_o_files(su_json_path: &Path, o_filepaths: &Vec<&Path>) {
     // Get stack usage info from .su files
     let mut fns = Vec::new();
     for o_filepath in o_filepaths {
@@ -33,7 +33,7 @@ fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage>
 
     println!("Parsing .su for {}", o_filepath.to_string_lossy());
 
-    // Convert .o filename to .su
+    // .su filename from .o filename
     let mut su_filepath = o_filepath.to_path_buf();
     su_filepath.set_extension("su");
 
@@ -77,8 +77,6 @@ fn get_stack_usage_from_su_file(o_filepath: &Path) -> Vec<fn_node::FnStackUsage>
                         let stack_usage_type = cols[2]; // TODO: seems like this is always "static", what are other types?
 
                         println!("{} {} {}", fn_symbol, stack_usage, stack_usage_type);
-
-                        // UPDATE NAMES HERE SO JSON FILE IS MADE WITH CORRECT FIELDS
 
                         let fn_su = FnStackUsage {
                             node: FnInfo::new(o_filepath, fn_symbol),

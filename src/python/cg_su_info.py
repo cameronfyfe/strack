@@ -50,7 +50,7 @@ def compute_max_su_for_fn(fn, funcs_list, callpath, config, cms_ind):
         # this node is a sink node on call graph (no further function calls), local su is max su
         if len(fn.children) is 0:
             fn.su_max = fn.su_local
-            fn.su_max_known = True
+            fn.su_max_known = fn.su_local_known
             debug_log(cms_ind + "(" + str(fn.su_max) + ")")
             return
 

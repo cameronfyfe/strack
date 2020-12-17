@@ -1,7 +1,8 @@
+use std::error::Error;
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::error::Error;
+
 use serde::{Deserialize, Serialize};
 use serde_json;
 #[derive(Serialize, Deserialize)]
@@ -37,18 +38,31 @@ impl Context<'_> {
     fn _config_json_path(strack_path: &Path) -> PathBuf {
         strack_path.join("in").join("strack_config.json")
     }
+
     pub fn config_json_path(&self) -> PathBuf {
         Context::_config_json_path(self.strack_path)
     }
+
+    pub fn log_file_dir(&self) -> PathBuf {
+        self.strack_path.join("local")
+    }
+
+    pub fn default_log_spec_file(&self) -> PathBuf {
+        self.strack_path.join("in").join("log_spec.toml")
+    }
+
     pub fn su_info_json_path(&self) -> PathBuf {
         self.strack_path.join("local").join("strack_su.json")
     }
+
     pub fn cg_info_json_path(&self) -> PathBuf {
         self.strack_path.join("local").join("strack_cg.json")
     }
+
     pub fn node_info_json_path(&self) -> PathBuf {
         self.strack_path.join("out").join("strack_fn_nodes.json")
     }
+
     pub fn report_json_path(&self) -> PathBuf {
         self.strack_path.join("out").join("strack_report.json")
     }

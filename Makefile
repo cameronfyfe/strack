@@ -1,11 +1,14 @@
-.PHONY: build test clean-test clean
+.PHONY: format build test clean-test clean
 
 default: build
+
+format:
+	rustfmt src/*
 
 build:
 	cargo build --release
 
-test:
+test: test-clean
 	cargo test
 
 test-clean:
