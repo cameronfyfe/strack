@@ -6,14 +6,14 @@ stages:
 variables:
   DOCKER_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
 
-Docker:
+BuildDocker:
   stage: docker
   image: docker:dind
   script:
-    # start docker daemon and give it time before making request
+    # start docker daemon and give it time before making a request
     - dockerd >/dev/null 2>&1 &
     - sleep 5 
-    # unset docker host so requests go to local service
+    # clear docker host url so requests go to local service
     - unset DOCKER_HOST
     # enable docker buildkit so caching options work
     - export DOCKER_BUILDKIT=1
@@ -35,17 +35,13 @@ Build:
     paths:
       - target/
   script:
-    - make build
-
-BuildTests:
-  stage: build
-  image: $DOCKER_IMAGE
-  cache:
-    key: build_$CI_COMMIT_REF_SLUG
-    paths:
-      - target/
-  script:
-    - make build-tests
+    # Quick check using cached build first
+    - cargo check
+    # Clean build
+    - make clean
+    - cargo build
+    # Build tests
+    - cargo build --tests
   artifacts:
     paths:
       - target/
@@ -55,5 +51,5 @@ RunTests:
   stage: tests
   image: $DOCKER_IMAGE
   script:
-    - make clean-test
+    - make test-clean
     - make test

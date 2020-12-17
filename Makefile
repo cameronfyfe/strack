@@ -1,23 +1,15 @@
-.PHONY: build build-release build-tests test clean-test clean
+.PHONY: build test clean-test clean
 
-default: all
+default: build
 
 build:
-	cargo build
-
-build-release:
 	cargo build --release
-
-build-tests:
-	cargo build --tests
-
-all: build
 
 test:
 	cargo test
 
-clean-test:
+test-clean:
 	rm -rf local out
 
-clean: clean-test
+clean: test-clean
 	rm -rf target
