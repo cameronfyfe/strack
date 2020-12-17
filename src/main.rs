@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate prettytable;
+pub mod analyze;
+pub mod call_graph;
 pub mod config;
 pub mod fn_node;
-pub mod analyze;
 pub mod report;
 pub mod stack_usage;
 
@@ -15,6 +16,8 @@ use std::{self, process::exit};
 
 use config::{Config, Context};
 use serde_json;
+
+use log::{info, trace, warn};
 
 fn _main(args: Vec<String>) -> i32 {
     let strack_path = Path::new(&args[0]);
@@ -32,13 +35,21 @@ fn _main(args: Vec<String>) -> i32 {
         return 1;
     }
 
+    // Init Logger
+    flexi_logger::Logger::with_str("info")
+        .log_to_file()
+        .directory(&ctx.log_file_dir())
+        .start_with_specfile(&ctx.default_log_spec_file())
+        .expect("Logger failed to initialize.");
+    info!("Logger initialized.");
+
     // Run Strack Function
     match strack_function {
         "analyze" => {
             analyze::analyze(&ctx, strack_args);
         }
         "report" => {
-            report::report(&ctx, strack_args);
+            report::report(&ctx);
         }
         _ => {
             println!("Invalid strack function.");
@@ -121,7 +132,7 @@ mod tests {
         // Verify some hardcoded results from report for this example build
         assert_eq!(report_file.total_function_nodes, 811);
         assert_eq!(report_file.num_functions_known_local_stack, 809);
-        assert_eq!(report_file.num_functions_known_max_stack, 810);
+        assert_eq!(report_file.num_functions_known_max_stack, 809);
         assert_eq!(report_file.tracked_functions[0].name, "main");
         assert_eq!(report_file.tracked_functions[0].su_max, 316);
         assert_eq!(report_file.tracked_functions[1].name, "LED_Thread1");
@@ -132,10 +143,10 @@ mod tests {
             report_file.unknown_local_su,
             vec!["Reset_Handler", "ADC3_IRQHandler"]
         );
-        assert_eq!(report_file.unknown_max_su, vec!["Reset_Handler"]);
+        assert_eq!(report_file.unknown_max_su, vec!["Reset_Handler", "ADC3_IRQHandler"]);
         assert_eq!(
             report_file.missing_children,
-            vec!["__libc_init_array", "__aeabi_uldivmod", "memcpy", "memset"]
+            vec!["__aeabi_uldivmod", "memcpy", "memset"]
         );
     }
 }
