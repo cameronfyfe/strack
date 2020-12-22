@@ -6,7 +6,7 @@
       {
         "label": "build",
         "type": "shell",
-        "command": "cargo check && cargo check --tests",
+        "command": "cargo check",
         "group": {
             "kind": "build",
             "isDefault": true
