@@ -40,68 +40,68 @@ def get_index_by_symbol_name(fns, symbol):
             return i
 
 def compute_max_su_for_fn(fn, funcs_list, callpath, config, cms_ind):
-        debug_log(cms_ind + "Computing max SU for " + fn.fn_id.name)
+    debug_log(cms_ind + "Computing max SU for " + fn.fn_id.name)
 
-        # already computed max su for this node
-        if fn.su_max is not -1:
-            debug_log(cms_ind + "(" + str(fn.su_max) + ")")
-            return
-
-        # this node is a sink node on call graph (no further function calls), local su is max su
-        if len(fn.children) is 0:
-            fn.su_max = fn.su_local
-            fn.su_max_known = fn.su_local_known
-            debug_log(cms_ind + "(" + str(fn.su_max) + ")")
-            return
-
-        # use max of child nodes
-        max_child_su_func = None
-        for child_name in fn.children:
-            
-            child_callpath = callpath[:]
-            child_callpath.append(fn.fn_id.name)
-            # recursion in callpath
-            if callpath_has_recursion(child_callpath) is True:
-                print_error = True if config.allow_recursion is False else False
-                debug_log(cms_ind + "RECURSION PATH DETECTED!!!", print_error)
-                debug_log(cms_ind + get_callpath_text(child_callpath), print_error)
-                if config.allow_recursion is False:
-                    strack_die()
-                else:
-                    fn.su_max = 99000000
-                    fn.su_max_known = False
-                    debug_log(cms_ind + "(" + str(fn.su_max) + ")")
-                    return
-
-            ci = get_index_by_obj_and_symbol_name(funcs_list, fn, child_name)
-            if ci is None:
-                fn.children_missing.append(child_name)
-                continue
-
-            compute_max_su_for_fn(funcs_list[ci], funcs_list, child_callpath, config, cms_ind+"  ")
-            debug_log(cms_ind + "-" + child_name + " (" + str(funcs_list[ci].su_max) + ")")
-            if max_child_su_func is None:
-                max_child_su_func = funcs_list[ci]
-            elif funcs_list[ci].su_max > max_child_su_func.su_max:
-                max_child_su_func = funcs_list[ci]
-
-        # check if we found a child node for max su
-        if max_child_su_func is None:
-            fn.su_max_known = False
-            debug_log("Error: function node is not sink but no children found.")
-            return
-
-        # record callpath for max su from this node
-        fn.su_max_callpath.append(max_child_su_func.fn_id.name)
-        fn.su_max_callpath.extend(max_child_su_func.su_max_callpath)
-        # compute max su
-        fn.su_max = fn.su_local + config.frame_cost + max_child_su_func.su_max
-        # check if max su is known or unknown based on callpath
-        if max_child_su_func.su_max_known is True and fn.su_local_known is True:
-            fn.su_max_known = True
-        else:
-            fn.su_max_known = False
+    # already computed max su for this node
+    if fn.su_max is not -1:
         debug_log(cms_ind + "(" + str(fn.su_max) + ")")
+        return
+
+    # this node is a sink node on call graph (no further function calls), local su is max su
+    if len(fn.children) is 0:
+        fn.su_max = fn.su_local
+        fn.su_max_known = fn.su_local_known
+        debug_log(cms_ind + "(" + str(fn.su_max) + ")")
+        return
+
+    # use max of child nodes
+    max_child_su_func = None
+    for child_name in fn.children:
+        
+        child_callpath = callpath[:]
+        child_callpath.append(fn.fn_id.name)
+        # recursion in callpath
+        if callpath_has_recursion(child_callpath) is True:
+            print_error = True if config.allow_recursion is False else False
+            debug_log(cms_ind + "RECURSION PATH DETECTED!!!", print_error)
+            debug_log(cms_ind + get_callpath_text(child_callpath), print_error)
+            if config.allow_recursion is False:
+                strack_die()
+            else:
+                fn.su_max = 99000000
+                fn.su_max_known = False
+                debug_log(cms_ind + "(" + str(fn.su_max) + ")")
+                return
+
+        ci = get_index_by_obj_and_symbol_name(funcs_list, fn, child_name)
+        if ci is None:
+            fn.children_missing.append(child_name)
+            continue
+
+        compute_max_su_for_fn(funcs_list[ci], funcs_list, child_callpath, config, cms_ind+"  ")
+        debug_log(cms_ind + "-" + child_name + " (" + str(funcs_list[ci].su_max) + ")")
+        if max_child_su_func is None:
+            max_child_su_func = funcs_list[ci]
+        elif funcs_list[ci].su_max > max_child_su_func.su_max:
+            max_child_su_func = funcs_list[ci]
+
+    # check if we found a child node for max su
+    if max_child_su_func is None:
+        fn.su_max_known = False
+        debug_log("Error: function node is not sink but no children found.")
+        return
+
+    # record callpath for max su from this node
+    fn.su_max_callpath.append(max_child_su_func.fn_id.name)
+    fn.su_max_callpath.extend(max_child_su_func.su_max_callpath)
+    # compute max su
+    fn.su_max = fn.su_local + config.frame_cost + max_child_su_func.su_max
+    # check if max su is known or unknown based on callpath
+    if max_child_su_func.su_max_known is True and fn.su_local_known is True:
+        fn.su_max_known = True
+    else:
+        fn.su_max_known = False
+    debug_log(cms_ind + "(" + str(fn.su_max) + ")")
 
 def analyze_cg_and_su(nodes_fname, report_fname, su_fname, cg_fname, config):
     start_time = time.time()

@@ -4,45 +4,45 @@ use std::io::BufReader;
 use std::path::Path;
 use std::process::Command;
 use std::vec::Vec;
+use std::collections::HashMap;
 
 use log::{info, trace, warn};
 
 use super::fn_node;
-use super::fn_node::FnEdgeInfo;
 use super::fn_node::FnInfo;
-use super::fn_node::Lang;
+use super::fn_node::FnNode;
 
-pub fn create_cg_info_file_from_o_files(cg_json_path: &Path, o_filepaths: &Vec<&Path>) {
-    // Get call graph info from .o files
-    let mut fns = Vec::new();
-    for o_filepath in o_filepaths {
-        fns.extend(get_call_graph_from_o_file(o_filepath));
-    }
+// pub fn create_cg_info_file_from_o_files(cg_json_path: &Path, o_filepaths: &Vec<&Path>) {
+//     // Get call graph info from .o files
+//     let mut fns = Vec::new();
+//     for o_filepath in o_filepaths {
+//         fns.extend(get_call_graph_from_o_file(o_filepath));
+//     }
 
-    // Write call graph info to json format
-    let json = serde_json::to_string_pretty(&fns).unwrap();
+//     // Write call graph info to json format
+//     let json = serde_json::to_string_pretty(&fns).unwrap();
 
-    // Write call graph json to file
-    println!("Writing cg json to {}.", cg_json_path.to_string_lossy());
-    fs::create_dir_all(cg_json_path.parent().unwrap()).unwrap();
-    fs::File::create(cg_json_path)
-        .unwrap()
-        .write(json.as_bytes())
-        .unwrap();
-}
+//     // Write call graph json to file
+//     println!("Writing cg json to {}.", cg_json_path.to_string_lossy());
+//     fs::create_dir_all(cg_json_path.parent().unwrap()).unwrap();
+//     fs::File::create(cg_json_path)
+//         .unwrap()
+//         .write(json.as_bytes())
+//         .unwrap();
+// }
 
-fn get_call_graph_from_o_file(o_filepath: &Path) -> Vec<fn_node::FnEdgeInfo> {
-    let mut fns: Vec<FnEdgeInfo> = Vec::new();
+pub fn get_call_graph_from_o_file(o_filepath: &Path) -> HashMap<String, Vec<String>> {
+    let mut fns = HashMap::new();
     // Working node while parsing
-    let mut cur_node = None as Option<FnEdgeInfo>;
+    let mut cur_node = None as Option<(String, Vec<String>)>;
     // TODO: do this differently, not at all how I want this but this works for now
     // Not sure if a closure can mutably borrow a capture...
-    let mut push_cur_node = |node: &Option<FnEdgeInfo>| -> Option<FnEdgeInfo> {
+    let mut push_cur_node = |node: &Option<(String, Vec<String>)>| -> Option<(String, Vec<String>)> {
         match node {
             Some(node) => {
-                let mut n = node.clone();
-                cleanup_edge_info(&mut n);
-                fns.push(n);
+                let mut c = node.1.clone();
+                cleanup_children(&mut c);
+                fns.insert(node.0.to_string(), c);
             },
             None => {
                 warn!("Tried to push empty cur_node");
@@ -97,10 +97,10 @@ fn get_call_graph_from_o_file(o_filepath: &Path) -> Vec<fn_node::FnEdgeInfo> {
             let fn_name = sanitize_symbol_name(fn_name);
             // TODO: probably handle more things that gcc can do but haven't come up yet
             trace!("*** New Function: {}", &fn_name);
-            cur_node = Some(FnEdgeInfo {
-                node: FnInfo::new(&o_filepath, fn_name.as_str()),
-                children: Vec::new(),
-            });
+            cur_node = Some((
+                fn_name,
+                Vec::new(),
+            ));
             continue;
         // instruction for jumpiong to another fn
         // TODO: update criteria to catch all branch and link events
@@ -109,7 +109,7 @@ fn get_call_graph_from_o_file(o_filepath: &Path) -> Vec<fn_node::FnEdgeInfo> {
             trace!("*** New Callee: {}", callee_name);
             match cur_node {
                 Some(ref mut node) => {
-                    node.children.push(callee_name);
+                    node.1.push(callee_name);
                 },
                 None => {
                     warn!("Callee {} found without working node", callee_name);
@@ -146,8 +146,8 @@ fn sanitize_symbol_name(name: &str) -> String {
     }
 }
 
-fn cleanup_edge_info(node: &mut FnEdgeInfo) {
+fn cleanup_children(children: &mut Vec<String>) {
     // remove duplicates for functions call multiple times in same function
-    node.children.sort();
-    node.children.dedup();
+    children.sort();
+    children.dedup();
 }
