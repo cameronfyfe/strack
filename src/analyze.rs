@@ -1,18 +1,46 @@
+use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::path::Path;
-use std::process::Command;
-use serde::{de, Deserialize, Serialize};
 use std::path::PathBuf;
+use std::process::Command;
+
+use serde::{de, Deserialize, Serialize};
+
 use super::call_graph;
 use super::config::{Config, Context};
-use super::stack_usage;
-use std::collections::HashMap;
 use super::fn_node::*;
+use super::stack_usage;
+
+enum ComputedMaxStack {
+    Value(Option<MaxStackInfo>),
+    AlreadyComputed,
+}
 
 pub fn analyze(ctx: &Context, args: Vec<&str>) {
     let o_filepaths = args.iter().map(|&p| Path::new(p)).collect::<Vec<&Path>>();
 
+    let mut fns = get_stack_usage_and_call_graph_info(&o_filepaths);
+
+    // Write json
+    let json = serde_json::to_string_pretty(&fns).unwrap();
+
+    // Write
+    println!(
+        "Writing su json to {}.",
+        &ctx.su_info_json_path().to_string_lossy()
+    );
+    fs::create_dir_all(&ctx.su_info_json_path().parent().unwrap()).unwrap();
+    fs::File::create(&ctx.su_info_json_path())
+        .unwrap()
+        .write(json.as_bytes())
+        .unwrap();
+
+    // Analyze
+    analyze_nodes(ctx, &mut fns);
+}
+
+fn get_stack_usage_and_call_graph_info(o_filepaths: &Vec<&Path>) -> Vec<FnNode> {
     let mut fns = Vec::new();
 
     // Get stack usage info from .su files
@@ -32,7 +60,8 @@ pub fn analyze(ctx: &Context, args: Vec<&str>) {
                 },
                 local_stack: Some(fns_stack.get(symbol.as_str()).unwrap().clone()),
                 max_stack: None,
-                children_missing: Vec::new(),
+                children_ids: None,
+                children_missing: None,
             });
         }
         // Remove processed functions so far
@@ -51,59 +80,69 @@ pub fn analyze(ctx: &Context, args: Vec<&str>) {
                 },
                 local_stack: None,
                 max_stack: None,
-                children_missing: Vec::new(),
+                children_ids: None,
+                children_missing: None,
             })
         }
     }
-
-    // Write json
-    let json = serde_json::to_string_pretty(&fns).unwrap();
-
-    // Write
-    println!("Writing su json to {}.", &ctx.su_info_json_path().to_string_lossy());
-    fs::create_dir_all(&ctx.su_info_json_path().parent().unwrap()).unwrap();
-    fs::File::create(&ctx.su_info_json_path())
-        .unwrap()
-        .write(json.as_bytes())
-        .unwrap();
-
-    // Analyze
-    analyze_nodes(ctx);
+    // Return
+    fns
 }
 
-// fn get_full_node_from_parts(cg: &FnStackUsage, ) -> Vec<FnNode> {
-
-//     // This node is a sink node on call graph (no further function calls)
-//     // so max stack usage is local stack usage
+fn analyze_nodes(ctx: &Context, fns: &mut Vec<FnNode>) {
+    populate_children_ids(fns);
+    for i in 0..fns.len() {
+        match compute_max_stack(&fns[i].clone(), fns, Vec::new()) {
+            ComputedMaxStack::Value(max_stack) => {
+                fns[i].max_stack = Some(max_stack);
+            }
+            ComputedMaxStack::AlreadyComputed => {}
+        }
+        
+    }
     
-// }
+}
 
-fn analyze_nodes(ctx: &Context) {
-    // let cg_fns = vec_from_json_file::<FnEdgeInfo>(&ctx.cg_info_json_path());
-    // let su_fns = vec_from_json_file::<FnStackUsage>(&ctx.su_info_json_path());
+fn compute_max_stack<'a>(f: &'a FnNode, fns: &mut Vec<FnNode>, mut callpath: Vec<&'a str>) -> ComputedMaxStack {
+    // Already computed
+    if f.max_stack.is_some() {
+        return ComputedMaxStack::AlreadyComputed;
+    }
+    // This node is a sink node on call graph (no further function calls)
+    // so max stack usage is local stack usage
+    if f.children.len() == 0 {
+        return match &f.local_stack {
+            Some(local_stack) => ComputedMaxStack::Value(Some(MaxStackInfo {
+                known: true,
+                usage: local_stack.usage,
+                call_path: Vec::new(),
+            })),
+            None => ComputedMaxStack::Value(None),
+        };
+    }
+    // Use max of child nodes
+    // let mut max_child_fn = None;
+    for c in &f.children_ids {
+        let child_callpath = callpath.push(&f.info.name);
+    }
+    
+    ComputedMaxStack::Value(None)
+}
 
-    let fns: Vec<FnNode> = Vec::new();
-
-    // for cg_fn in &cg_fns {
-
-    //     fns.extend(get_full_node_from_parts(cg_fn, fns).iter());
-
-
-
-
-
-    //     let fnn = FnNode {
-    //         info: cg_fn.node.clone(),
-    //         edge_info: cg_fn.clone(),
-    //         stack_usage: su_fns.iter()
-    //         .find(|&f| f.node.symbol == cg_fn.node.symbol)
-    //         .cloned(),
-    //         children_missing: Vec::new(),
-    //         su_max: 0,
-    //         su_max_known: false,
-    //         su_max_call_path: Vec::new(),
-    //     };
-    // }
+fn populate_children_ids(fns: &mut Vec<FnNode>) {
+    for i in 0..fns.len() {
+        fns[i].children_ids = Some(Vec::new());
+        for c in &fns[i].children.clone() {
+            match fns.iter().position(|i| c == &i.info.name) {
+                Some(id) => {
+                    &fns[i].children_ids.as_mut().unwrap().push(id);
+                }
+                None => {
+                    fns[i].children_missing.as_mut().unwrap().push(c.to_string());
+                }
+            };
+        }
+    }
 }
 
 fn vec_from_json_file<T: de::DeserializeOwned>(file: &PathBuf) -> Vec<T> {
@@ -113,26 +152,9 @@ fn vec_from_json_file<T: de::DeserializeOwned>(file: &PathBuf) -> Vec<T> {
 fn obj_from_json_file<T: de::DeserializeOwned>(file: &PathBuf) -> T {
     let mut bfr = String::new();
     fs::File::open(file)
-        .expect(
-            format!(
-                "Error opening file for reading: {}",
-                file.to_string_lossy()
-            )
-            .as_str(),
-        )
+        .expect(format!("Error opening file for reading: {}", file.to_string_lossy()).as_str())
         .read_to_string(&mut bfr)
-        .expect(
-            format!(
-                "Error reading data from file: {}",
-                file.to_string_lossy()
-            )
-            .as_str(),
-        );
-    serde_json::from_str::<T>(&bfr).expect(
-        format!(
-            "Error parsing json from file: {}",
-            file.to_string_lossy()
-        )
-        .as_str(),
-    )
+        .expect(format!("Error reading data from file: {}", file.to_string_lossy()).as_str());
+    serde_json::from_str::<T>(&bfr)
+        .expect(format!("Error parsing json from file: {}", file.to_string_lossy()).as_str())
 }

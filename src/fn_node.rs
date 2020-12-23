@@ -75,6 +75,7 @@ pub struct LocalStackInfo {
 #[derive(Clone)]
 #[derive(Serialize)]
 pub struct MaxStackInfo {
+    pub known: bool,
     pub usage: u32,
     pub call_path: Vec<String>
 }
@@ -85,6 +86,7 @@ pub struct FnNode {
     pub info: FnInfo,
     pub children: Vec<String>,
     pub local_stack: Option<LocalStackInfo>,
-    pub max_stack: Option<MaxStackInfo>,
-    pub children_missing: Vec<String>,
+    pub max_stack: Option<Option<MaxStackInfo>>,
+    pub children_ids: Option<Vec<usize>>,
+    pub children_missing: Option<Vec<String>>,
 }

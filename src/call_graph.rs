@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::Path;
@@ -7,29 +6,6 @@ use std::vec::Vec;
 use std::collections::HashMap;
 
 use log::{info, trace, warn};
-
-use super::fn_node;
-use super::fn_node::FnInfo;
-use super::fn_node::FnNode;
-
-// pub fn create_cg_info_file_from_o_files(cg_json_path: &Path, o_filepaths: &Vec<&Path>) {
-//     // Get call graph info from .o files
-//     let mut fns = Vec::new();
-//     for o_filepath in o_filepaths {
-//         fns.extend(get_call_graph_from_o_file(o_filepath));
-//     }
-
-//     // Write call graph info to json format
-//     let json = serde_json::to_string_pretty(&fns).unwrap();
-
-//     // Write call graph json to file
-//     println!("Writing cg json to {}.", cg_json_path.to_string_lossy());
-//     fs::create_dir_all(cg_json_path.parent().unwrap()).unwrap();
-//     fs::File::create(cg_json_path)
-//         .unwrap()
-//         .write(json.as_bytes())
-//         .unwrap();
-// }
 
 pub fn get_call_graph_from_o_file(o_filepath: &Path) -> HashMap<String, Vec<String>> {
     let mut fns = HashMap::new();
